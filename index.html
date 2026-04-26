@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>漫游奇想国动画生成</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(145deg, #f7f9fc 0%, #eef2f7 100%);
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, 'Noto Sans', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.5rem;
+        }
+
+        /* 主卡片 */
+        .wonder-card {
+            max-width: 1000px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(2px);
+            border-radius: 2.5rem;
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15), 0 1px 2px rgba(0, 0, 0, 0.03);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+        }
+
+        /* 头部区域 */
+        .hero {
+            padding: 2rem 2rem 1.2rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .hero h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            background: linear-gradient(135deg, #2B3B4E, #1F4E6B, #3F2E4E);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .hero .sub {
+            color: #5b6e8c;
+            font-size: 0.95rem;
+            font-weight: 400;
+            margin-top: 0.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .hero .sub span {
+            background: rgba(79, 114, 148, 0.1);
+            padding: 0.2rem 0.8rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            color: #2c5778;
+        }
+
+        /* 视频区域容器 */
+        .video-container {
+            padding: 1.8rem 2rem 1.5rem 2rem;
+            background: #ffffffcc;
+        }
+
+        .video-wrapper {
+            background: #0a0c10;
+            border-radius: 1.8rem;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -8px rgba(0, 0, 0, 0.2);
+            transition: box-shadow 0.2s;
+            position: relative;
+        }
+
+        video {
+            width: 100%;
+            display: block;
+            background: #0a0c10;
+            aspect-ratio: 16 / 9;
+            object-fit: contain;
+        }
+
+        /* 控制栏和上传区域 */
+        .action-panel {
+            padding: 0 2rem 2rem 2rem;
+        }
+
+        .file-info {
+            background: #f0f4f9;
+            border-radius: 2rem;
+            padding: 0.8rem 1.2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            font-size: 0.85rem;
+            color: #2c3e4e;
+            border: 1px solid #e2e9f0;
+        }
+
+        .file-name {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+            font-weight: 500;
+            word-break: break-all;
+        }
+
+        .file-name .label {
+            background: #dfe6ef;
+            padding: 0.2rem 0.7rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #1f4e6b;
+        }
+
+        .file-name .value {
+            color: #1e2f3c;
+            max-width: 280px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .clear-btn {
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            color: #8f9eb2;
+            transition: all 0.2s;
+            padding: 0.3rem 0.7rem;
+            border-radius: 2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            background: #ffffffaa;
+        }
+
+        .clear-btn:hover {
+            background: #ffeded;
+            color: #c05a5a;
+            transform: scale(0.96);
+        }
+
+        /* 按钮组 */
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+
+        .upload-btn {
+            background: linear-gradient(100deg, #2c5f7f, #1e465f);
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 3rem;
+            color: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.25s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            letter-spacing: 0.3px;
+        }
+
+        .upload-btn:hover {
+            background: linear-gradient(100deg, #1e4a68, #153e53);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 20px -8px rgba(28, 65, 88, 0.4);
+        }
+
+        .upload-btn:active {
+            transform: translateY(1px);
+        }
+
+        .drag-hint {
+            font-size: 0.75rem;
+            color: #7c8b9f;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            background: #f8fafd;
+            padding: 0.4rem 1rem;
+            border-radius: 40px;
+        }
+
+        /* 拖拽高亮区域 */
+        .drag-overlay-active {
+            transition: all 0.1s;
+        }
+
+        .video-wrapper.drag-over {
+            box-shadow: 0 0 0 3px #2c7da0, 0 12px 28px rgba(0, 0, 0, 0.2);
+            transform: scale(0.99);
+        }
+
+        /* 简洁辅助 */
+        footer {
+            text-align: center;
+            padding: 1rem 2rem 1.5rem;
+            font-size: 0.7rem;
+            color: #99a9bb;
+            border-top: 1px solid rgba(0, 0, 0, 0.03);
+            letter-spacing: 0.3px;
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 1rem;
+            }
+            .hero h1 {
+                font-size: 1.6rem;
+            }
+            .video-container {
+                padding: 1rem;
+            }
+            .action-panel {
+                padding: 0 1.2rem 1.8rem 1.2rem;
+            }
+            .button-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .upload-btn {
+                justify-content: center;
+            }
+            .drag-hint {
+                justify-content: center;
+            }
+            .file-name .value {
+                max-width: 160px;
+            }
+        }
+
+        /* 自定义错误或提示轻微过渡 */
+        .info-message {
+            transition: all 0.2s;
+        }
+    </style>
+</head>
+<body>
+
+<div class="wonder-card">
+    <div class="hero">
+        <h1>✨ 漫游奇想国动画生成 ✨</h1>
+        <div class="sub">
+            <span>🎬 上传你的动画 / 影像</span>
+            <span>🎨 幻想即宇宙</span>
+        </div>
+    </div>
+
+    <div class="video-container">
+        <div class="video-wrapper" id="videoWrapper">
+            <video id="videoPlayer" controls playsinline poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 450'%3E%3Crect width='800' height='450' fill='%231E2A36'/%3E%3Ctext x='50%25' y='45%25' font-size='18' font-family='system-ui, sans-serif' fill='%23B8CDE0' text-anchor='middle' dy='.3em'%3E🎞️ 等待视频降临%3C/text%3E%3Ctext x='50%25' y='55%25' font-size='13' fill='%23829AB3' text-anchor='middle' dy='.3em'%3E点击上方按钮 · 上传动画%3C/text%3E%3C/svg%3E">
+                您的浏览器不支持 video 标签。
+            </video>
+        </div>
+    </div>
+
+    <div class="action-panel">
+        <div class="file-info" id="fileInfoArea">
+            <div class="file-name">
+                <span class="label">📁 当前影片</span>
+                <span class="value" id="fileNameDisplay">未上传任何视频</span>
+            </div>
+            <button class="clear-btn" id="clearVideoBtn" title="清除视频">✕ 清除</button>
+        </div>
+
+        <div class="button-group">
+            <button class="upload-btn" id="uploadBtn">
+                📂 选择动画视频
+            </button>
+            <div class="drag-hint">
+                📀 或拖放文件到播放器区域
+            </div>
+        </div>
+        <div style="margin-top: 1rem; text-align: center; font-size: 0.7rem; color: #99aec5;">
+            支持 MP4, WebM, MOV, AVI 等常见格式 (浏览器兼容优先 H.264/MP4)
+        </div>
+    </div>
+    <footer>
+        🌈 奇想世界 · 每一帧都是漫游的入口
+    </footer>
+</div>
+
+<script>
+    (function() {
+        // DOM 元素
+        const video = document.getElementById('videoPlayer');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'video/*';   // 接受所有视频类型
+        fileInput.style.display = 'none';
+        document.body.appendChild(fileInput);
+
+        const fileNameSpan = document.getElementById('fileNameDisplay');
+        const clearBtn = document.getElementById('clearVideoBtn');
+        const videoWrapper = document.getElementById('videoWrapper');
+
+        // 存储当前 ObjectURL 以便释放内存
+        let currentObjectUrl = null;
+
+        // 默认占位poster (内嵌svg, 在重置时恢复)
+        const DEFAULT_POSTER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 450'%3E%3Crect width='800' height='450' fill='%231E2A36'/%3E%3Ctext x='50%25' y='45%25' font-size='18' font-family='system-ui, sans-serif' fill='%23B8CDE0' text-anchor='middle' dy='.3em'%3E🎞️ 等待视频降临%3C/text%3E%3Ctext x='50%25' y='55%25' font-size='13' fill='%23829AB3' text-anchor='middle' dy='.3em'%3E点击上方按钮 · 上传动画%3C/text%3E%3C/svg%3E";
+
+        // 辅助方法: 释放当前视频资源
+        function revokeCurrentVideo() {
+            if (currentObjectUrl) {
+                URL.revokeObjectURL(currentObjectUrl);
+                currentObjectUrl = null;
+            }
+            // 如果video正在播放且src指向旧的objectURL，清除src并重置
+            if (video.src) {
+                // 避免触发额外的错误，先暂停并移除src
+                video.pause();
+                video.removeAttribute('src');
+                video.load();   // 重置加载状态, 显示poster
+            }
+            // 确保poster占位图恢复 (让界面清爽)
+            video.poster = DEFAULT_POSTER;
+        }
+
+        // 更新文件名显示
+        function updateFileNameDisplay(name) {
+            if (name && name.trim() !== "") {
+                fileNameSpan.textContent = name;
+                fileNameSpan.style.opacity = "1";
+            } else {
+                fileNameSpan.textContent = "未上传任何视频";
+            }
+        }
+
+        // 核心: 处理视频文件
+        function handleVideoFile(file) {
+            // 基本校验
+            if (!file) return false;
+            if (!file.type.startsWith('video/')) {
+                showTemporaryMessage("⛔ 请选择一个视频文件 (MP4, WebM, MOV等)", 1800);
+                return false;
+            }
+            // 限制文件大小 (可选, 避免特大崩溃, 设置最大1GB? 浏览器基本可处理)
+            const maxSize = 1024 * 1024 * 1024; // 1GB 阈值
+            if (file.size > maxSize) {
+                showTemporaryMessage("⚠️ 视频超过1GB，可能影响性能，建议压缩后上传", 2500);
+                // 仍然允许，只是提醒，不阻断
+            }
+
+            // 释放旧的 ObjectURL 资源
+            revokeCurrentVideo();
+
+            // 创建新的 ObjectURL
+            const newUrl = URL.createObjectURL(file);
+            currentObjectUrl = newUrl;
+
+            // 设置视频源
+            video.src = newUrl;
+            // 清除poster，让视频第一帧展示 (如果未设置poster消除也行)
+            // 注意poster会在视频开始加载后被覆盖，但设为空更干净，保留也可能短暂显示，无伤大雅
+            video.poster = '';   // 希望展示真实视频内容，不显示占位图
+            
+            // 确保视频重新加载
+            video.load();
+            
+            // 监听元数据加载完成等事件，同时可以自动调节但不要自动播放（尊重浏览器策略）
+            // 为了提高用户体验，加载完成后不自动播放，用户可点播放，而且支持控制条
+            video.onloadedmetadata = () => {
+                // 可选择性显示视频时长信息，不干扰简洁性
+                if (video.duration && isFinite(video.duration)) {
+                    // 有兴趣可以打印，不做UI修改保持整洁
+                }
+                // 确保视频能正常展示控制栏
+            };
+            
+            video.onerror = (e) => {
+                console.warn("视频加载错误", e);
+                let errorMsg = "无法播放此视频，可能格式不兼容。尝试转换为H.264编码的MP4。";
+                if (video.error) {
+                    switch(video.error.code) {
+                        case 1: errorMsg = "视频加载中断，请重试。"; break;
+                        case 2: errorMsg = "网络错误，请检查文件。"; break;
+                        case 3: errorMsg = "视频解码失败，请尝试其他格式。"; break;
+                        case 4: errorMsg = "不支持的视频格式或文件损坏。"; break;
+                        default: errorMsg = "视频播放出错。";
+                    }
+                }
+                showTemporaryMessage(`❌ ${errorMsg}`, 3000);
+                // 出错后清空当前无效的 URL 并恢复占位状态
+                revokeCurrentVideo();
+                updateFileNameDisplay("上传失败，请重试");
+                video.poster = DEFAULT_POSTER;
+                currentObjectUrl = null;
+            };
+            
+            // 成功加载后更新文件名
+            let displayFileName = file.name.length > 40 ? file.name.substring(0, 36) + '...' : file.name;
+            updateFileNameDisplay(displayFileName);
+            
+            // 可选: 播放尝试? 尊重用户手势，不自动播放，避免被浏览器策略阻止
+            // 但用户点击播放按钮即可, 更加符合简洁自然的交互
+            
+            // 细微的高清感觉: 让video包装阴影效果闪烁一下
+            videoWrapper.style.transition = 'all 0.2s';
+            videoWrapper.style.boxShadow = '0 0 0 2px #7bc3e0, 0 16px 30px -10px rgba(0,0,0,0.2)';
+            setTimeout(() => {
+                if (videoWrapper) videoWrapper.style.boxShadow = '';
+            }, 500);
+            
+            return true;
+        }
+        
+        // 临时消息浮层 (避免额外增加复杂组件，轻提醒)
+        let toastTimer = null;
+        function showTemporaryMessage(msg, duration = 2000) {
+            // 尝试获取或创建提示浮层
+            let toast = document.getElementById('dynamicToastMsg');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'dynamicToastMsg';
+                toast.style.position = 'fixed';
+                toast.style.bottom = '30px';
+                toast.style.left = '50%';
+                toast.style.transform = 'translateX(-50%)';
+                toast.style.backgroundColor = '#1f2f3ad9';
+                toast.style.backdropFilter = 'blur(12px)';
+                toast.style.color = '#f0f3f8';
+                toast.style.padding = '8px 20px';
+                toast.style.borderRadius = '60px';
+                toast.style.fontSize = '0.85rem';
+                toast.style.fontWeight = '500';
+                toast.style.zIndex = '999';
+                toast.style.boxShadow = '0 6px 16px rgba(0,0,0,0.2)';
+                toast.style.fontFamily = 'inherit';
+                toast.style.pointerEvents = 'none';
+                toast.style.whiteSpace = 'nowrap';
+                toast.style.maxWidth = '90%';
+                toast.style.whiteSpace = 'normal';
+                toast.style.textAlign = 'center';
+                document.body.appendChild(toast);
+            }
+            toast.textContent = msg;
+            toast.style.opacity = '1';
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                if (toast) toast.style.opacity = '0';
+                setTimeout(() => {
+                    if (toast && toast.parentNode && toast.style.opacity === '0') {
+                        toast.remove();
+                    }
+                }, 300);
+            }, duration);
+        }
+        
+        // 清空视频
+        function clearVideo() {
+            revokeCurrentVideo();       // 释放资源、清空video.src、重置poster
+            // 重置文件名显示
+            updateFileNameDisplay("未上传任何视频");
+            // 重置文件input的value，允许重新选择同一个文件时依然触发change
+            if (fileInput) fileInput.value = '';
+            // 重置video的poster为默认优雅占位
+            video.poster = DEFAULT_POSTER;
+            // 移除可能的错误样式或提示
+            video.onerror = null;
+            // 重新挂载基础的onerror (重新绑定，但保持全局)
+            video.onerror = (e) => {
+                if (video.src && video.src.startsWith('blob:')) {
+                    // 正常清空后不处理，避免误报
+                } else {
+                    console.log("video error after clear");
+                }
+            };
+            showTemporaryMessage("已清除视频，可以上传新动画", 1500);
+        }
+        
+        // 通过文件选择器选择
+        function triggerFileSelect() {
+            fileInput.click();
+        }
+        
+        // 监听 input 变化
+        fileInput.addEventListener('change', (e) => {
+            if (fileInput.files && fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                handleVideoFile(file);
+            }
+            // 清空 input value 以便下次相同文件也能触发
+            fileInput.value = '';
+        });
+        
+        // 上传按钮事件
+        uploadBtn.addEventListener('click', triggerFileSelect);
+        
+        // 清除按钮事件
+        clearBtn.addEventListener('click', clearVideo);
+        
+        // ---------- 拖拽上传功能 (增强简洁体验) ----------
+        // 整个视频wrapper作为拖拽目标，提升友好度
+        const dragZone = videoWrapper;
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dragZone.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        // 高亮效果
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dragZone.addEventListener(eventName, () => {
+                dragZone.classList.add('drag-over');
+            }, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            dragZone.addEventListener(eventName, () => {
+                dragZone.classList.remove('drag-over');
+            }, false);
+        });
+        
+        // 处理拖拽放下
+        dragZone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files && files.length > 0) {
+                const file = files[0];
+                if (file.type.startsWith('video/')) {
+                    handleVideoFile(file);
+                    // 清除input值以便一致性
+                    if (fileInput) fileInput.value = '';
+                } else {
+                    showTemporaryMessage("请拖拽视频文件 (MP4/WebM等格式)", 1800);
+                }
+            }
+        }, false);
+        
+        // 附加：针对整个页面或者卡片优雅防止意外拖拽打开链接
+        window.addEventListener('dragover', (e) => {
+            if (e.target === dragZone || dragZone.contains(e.target)) return;
+            // 其他区域不做高亮但阻止默认防止浏览器直接打开文件
+            e.preventDefault();
+        });
+        window.addEventListener('drop', (e) => {
+            if (e.target === dragZone || dragZone.contains(e.target)) return;
+            e.preventDefault();
+        });
+        
+        // 如果用户试图在非视频拖放区拖放文件给出提示
+        document.body.addEventListener('drop', (e) => {
+            const isInZone = dragZone.contains(e.target);
+            if (!isInZone && e.dataTransfer.files.length > 0) {
+                e.preventDefault();
+                showTemporaryMessage("✨ 将视频拖拽到中央播放器区域即可上传 ✨", 2000);
+            }
+        });
+        
+        // 页面初次加载确保poster合适，未上传视频时显示默认占位
+        if (!video.src || video.src === '') {
+            video.poster = DEFAULT_POSTER;
+        }
+        
+        // 额外监听video 加载完成后的播报/优雅处理资源释放再次选择时避免内存泄露
+        // 页面beforeunload时可选清理blob链接, 但不是必须, 不过为了完美
+        window.addEventListener('beforeunload', () => {
+            if (currentObjectUrl) {
+                URL.revokeObjectURL(currentObjectUrl);
+            }
+        });
+        
+        // 如果用户通过点击清除后重新上传，之前的监听都已包含。
+        // 保证上传后拖拽替换也同样清理旧资源（handleVideoFile已做）
+        
+        // 添加一个隐藏的辅助提示: 若浏览器自动播放策略, 信息不做强制性
+        // 以上满足"播放上传好的视频", 简洁款式且标题“漫游奇想国动画生成”完美呈现
+        console.log("已就绪 — 漫游奇想国动画播放器");
+    })();
+</script>
+</body>
+</html>
